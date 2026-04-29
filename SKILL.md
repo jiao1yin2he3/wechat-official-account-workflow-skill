@@ -1,11 +1,19 @@
 ﻿---
 name: wechat-post-skill
-description: End-to-end WeChat Official Account (微信公众号) publishing workflow for high-traffic posts: topic selection, article drafting, humanization, AI cover/body images, self-review, draft publishing, and cleanup. Use when the user asks to 发公众号, 写公众号文章, 做公众号推送, 发布草稿箱, or package/operate a complete WeChat article workflow.
+description: User-authorized WeChat Official Account article workflow: topic selection, drafting, editing, image planning, pre-publish review, and publishing to the user\'s own WeChat draft box. Use when the user asks to 发公众号, 写公众号文章, 做公众号推送, or 发布草稿箱. Requires user-provided account access; never stores credentials or publishes without explicit user direction.
 ---
 
 # WeChat Post Skill
 
 Use this skill to run a complete WeChat Official Account article pipeline, not just publish Markdown. The goal is a polished draft in the WeChat Official Account draft box.
+
+## Safety boundaries
+
+- Use only for the user's own WeChat Official Account or an account they are authorized to operate.
+- Do not store, print, commit, or publish AppSecret, tokens, cookies, or private account config.
+- Do not publish final content without explicit user direction; default target is the draft box unless instructed otherwise.
+- If API access is blocked by credentials or IP whitelist, ask the user to fix account settings instead of bypassing controls.
+- Keep generated article assets local unless the user asks to publish/upload them.
 
 ## Core workflow
 
@@ -79,4 +87,5 @@ bun "<baoyu-post-to-wechat>/scripts/wechat-api.ts" article.md --theme <theme> --
 - `references/content-playbook.md` — article structure, title/opening/ending patterns.
 - `references/gemini-browser-notes.md` — operational notes for browser-based Gemini image generation.
 - `references/publishing-notes.md` — WeChat draft publishing checks and common failures.
+
 
