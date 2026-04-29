@@ -1,19 +1,39 @@
-﻿---
+---
 name: wechat-post-skill
-description: User-authorized WeChat Official Account article workflow: topic selection, drafting, editing, image planning, pre-publish review, and publishing to the user's own WeChat draft box. Use when the user asks to 发公众号, 写公众号文章, 做公众号推送, or 发布草稿箱. Requires user-provided account access; never stores credentials or publishes without explicit user direction.
+homepage: https://github.com/jiao1yin2he3/wechat-post-skill
+description: User-authorized WeChat Official Account article workflow for topic selection, drafting, editing, image planning, pre-publish review, and handoff to the user's configured WeChat publishing tool. Use when the user asks to 发公众号, 写公众号文章, 做公众号推送, or 发布草稿箱. Requires the user to provide and control any WeChat account access through environment variables or a vetted companion publisher.
+metadata:
+  openclaw:
+    emoji: "📰"
+    homepage: https://github.com/jiao1yin2he3/wechat-post-skill
+    requires:
+      env:
+        - WECHAT_APP_ID
+        - WECHAT_APP_SECRET
+      anyBins:
+        - bun
+        - npx
+    primaryEnv: WECHAT_APP_SECRET
+    companionSkills:
+      - baoyu-post-to-wechat
+      - gemini-browser-image
+    notes:
+      - Requires a user-authorized WeChat Official Account environment.
+      - This skill does not include publishing code or credentials; it orchestrates vetted companion tools.
 ---
 
 # WeChat Post Skill
 
-Use this skill to run a complete WeChat Official Account article pipeline, not just publish Markdown. The goal is a polished draft in the WeChat Official Account draft box.
+Use this skill to prepare a polished WeChat Official Account draft and hand it off to a user-authorized publishing tool. It is an orchestration workflow, not a credential manager and not a browser-control package.
 
 ## Safety boundaries
 
 - Use only for the user's own WeChat Official Account or an account they are authorized to operate.
-- Do not store, print, commit, or publish AppSecret, tokens, cookies, or private account config.
-- Do not publish final content without explicit user direction; default target is the draft box unless instructed otherwise.
-- If API access is blocked by credentials or IP whitelist, ask the user to fix account settings instead of bypassing controls.
-- Keep generated article assets local unless the user asks to publish/upload them.
+- Do not ask the user to paste secrets into chat. Use environment variables or an agent-managed private config controlled by the user.
+- Do not store, print, commit, or publish AppSecret, tokens, cookies, browser profile data, or private account config.
+- Do not publish final content without explicit user direction; default target is the WeChat draft box unless instructed otherwise.
+- If API access is blocked by credentials, permissions, or IP allowlist settings, ask the user to fix account settings; do not bypass controls.
+- Browser-based publishing or image generation is out of scope for this skill. If needed, use a dedicated companion skill in an isolated, user-controlled browser profile.
 
 ## Core workflow
 
@@ -33,37 +53,29 @@ Use this skill to run a complete WeChat Official Account article pipeline, not j
    - Keep the article concrete, local, useful, and conversational.
    - If an AI-humanizer skill/tool exists, use it for analysis and targeted revision.
 
-4. **Generate images**
-   - Generate/copy into the article folder:
+4. **Prepare images**
+   - Prepare or generate the article assets in the article folder:
      - `cover.png` — WeChat cover, 2.35:1 preferred.
      - `img0.png` … — body images, usually 16:9.
-   - Use the existing image-generation capability available in the environment. If a Gemini browser image skill exists, use it for browser-based Gemini generation.
-   - For fragile browser image workflows, read `references/gemini-browser-notes.md`.
+   - Use only image-generation tools explicitly available and authorized in the current environment.
+   - For Gemini web UI image generation, use the separate `gemini-browser-image` companion skill rather than embedding browser instructions here.
 
-5. **Self-review before publishing**
+5. **Self-review before draft handoff**
    - Verify image placeholders use `![](imgX.png)`.
    - Verify all referenced image files exist.
-   - Verify no secrets or local-only credentials are embedded in `article.md`.
+   - Verify no secrets, local-only credentials, cookies, or tokens are embedded in `article.md`.
    - Choose theme by topic:
-     - tech/military/hard analysis: `modern`
+     - tech/hard analysis: `modern`
      - finance/business/career: `grace`
      - emotion/life/soft topics: `simple`
      - controversy/hot news: `default`
      - unsure: `grace`
 
-6. **Publish to draft box**
-   - Use the existing WeChat publishing skill/tool if available, especially `baoyu-post-to-wechat`.
-   - Preferred command pattern:
-
-```powershell
-$env:WECHAT_APP_ID="<from-env-or-local-config>"
-$env:WECHAT_APP_SECRET="<from-env-or-local-config>"
-cd "<article-folder>"
-bun "<baoyu-post-to-wechat>/scripts/wechat-api.ts" article.md --theme <theme> --submit --cover "cover.png"
-```
-
-   - Do not hardcode credentials into the skill or repo.
-   - If API publishing fails because of WeChat IP whitelist, check current outbound IP and ask the user to whitelist it.
+6. **Hand off to authorized publisher**
+   - Use a vetted WeChat publishing companion tool when available, such as `baoyu-post-to-wechat`.
+   - Confirm the required environment variables or private config already exist before running the publisher.
+   - Do not print secret values. Only report whether required configuration is present or missing.
+   - If publishing fails because of WeChat account settings, credentials, permissions, or IP allowlist, stop and ask the user to resolve those settings.
 
 7. **Clean up**
    - Remove temporary generated-image downloads when safe.
@@ -74,19 +86,9 @@ bun "<baoyu-post-to-wechat>/scripts/wechat-api.ts" article.md --theme <theme> --
 - The article must have a clear traffic goal: clicks, saves, comments, shares, or follower growth.
 - The first 100–300 characters must create tension, curiosity, usefulness, or emotional resonance.
 - Every image must serve the article: cover for click-through, body images for pacing/comprehension.
-- Never publish before self-review.
-
-## Safety and secrets
-
-- Never commit or publish `WECHAT_APP_SECRET`, tokens, cookies, real account secrets, or `.env` files.
-- Keep account-specific settings in local config, environment variables, or ignored files.
-- For public GitHub repos, include placeholders and setup notes only.
+- Never hand off for publishing before self-review.
 
 ## Optional references
 
 - `references/content-playbook.md` — article structure, title/opening/ending patterns.
-- `references/gemini-browser-notes.md` — operational notes for browser-based Gemini image generation.
-- `references/publishing-notes.md` — WeChat draft publishing checks and common failures.
-
-
-
+- `references/publishing-notes.md` — WeChat draft handoff checks and common failures.

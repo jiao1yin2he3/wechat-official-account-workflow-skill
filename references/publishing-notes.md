@@ -1,80 +1,49 @@
-# Publishing Notes
+﻿# Publishing Notes
 
-Use this reference before sending an article to the WeChat Official Account draft box.
+This skill prepares a WeChat Official Account article and hands it off to a user-authorized publishing tool. It does not contain publishing code or credentials.
 
-## Required files
+## Before handoff
 
-Inside the article folder:
+Verify:
 
-- `article.md`
-- `cover.png`
-- every body image referenced by Markdown placeholders, e.g. `img0.png`, `img1.png`
+- `article.md` exists and uses Markdown image placeholders such as `![](img0.png)`.
+- `cover.png` exists when the target publisher requires a cover.
+- Referenced body images exist in the article folder.
+- No secrets, tokens, cookies, browser profile paths, or private config values appear in the article body or frontmatter.
+- The target publishing tool is installed and trusted by the user.
 
-## Self-review checklist
+## Required account configuration
 
-Before publishing, verify:
+Actual WeChat publishing requires account access controlled by the user. Common configurations include:
 
-- Article title is strong and specific.
-- Opening reaches the point quickly.
-- `article.md` uses Markdown image placeholders: `![](img0.png)`, not plain text labels.
-- Every placeholder file exists in the same folder or correct relative path.
-- No secret values appear in article frontmatter or body.
-- HTML snippets, if any, use valid syntax: `<div style="...">`.
-- The selected theme fits the article.
+- `WECHAT_APP_ID`
+- `WECHAT_APP_SECRET`
+- private ignored config managed by the companion publishing tool
 
-## Theme selection
+Do not print secret values. It is safe to report only whether a required value appears to be present or missing.
 
-- `modern`: technology, hard analysis, finance charts, military-adjacent but safe topics.
-- `grace`: business, finance, workplace, city policy, serious public-service posts.
-- `simple`: emotion, lifestyle, neighborhood, warm human-interest posts.
-- `default`: controversy, hot news, sharp commentary.
-- If unsure, use `grace`.
+## Recommended publisher
 
-## Publishing method
+Use a vetted companion publishing skill/tool, for example `baoyu-post-to-wechat`, when it is installed and trusted in the current environment.
 
-Prefer API publishing when configured because it is repeatable and precise.
+Before running any publisher:
 
-Do not store credentials in the skill or repository. Read them from:
+1. Confirm the user asked to create or update a WeChat draft.
+2. Confirm required account configuration is present.
+3. Confirm the target is the draft box unless the user explicitly asks otherwise.
+4. Run the smallest publisher command supported by the companion tool.
+5. Verify success by checking the publisher output or draft-box evidence.
 
-- environment variables
-- local ignored `.env` files
-- account-level private config supported by the publishing skill
+## Failure handling
 
-Example command pattern:
+| Issue | Action |
+|---|---|
+| Missing account config | Ask the user to configure the companion publisher or environment variables. |
+| Invalid credentials | Stop and ask the user to update WeChat account settings. |
+| IP allowlist / permission failure | Ask the user to update the WeChat Official Account settings. Do not bypass controls. |
+| Image placeholder mismatch | Fix `article.md` placeholders and retry. |
+| Publisher unavailable | Stop and explain which companion tool is needed. |
 
-```powershell
-$env:WECHAT_APP_ID="<your-app-id>"
-$env:WECHAT_APP_SECRET="<your-app-secret>"
-cd "<article-folder>"
-bun "<path-to-baoyu-post-to-wechat>/scripts/wechat-api.ts" article.md --theme grace --submit --cover "cover.png"
-```
+## Browser workflows
 
-## Common failures
-
-### Invalid credential / missing environment
-
-Check whether the app ID and secret are available in the current shell or private config.
-
-### IP whitelist error
-
-WeChat Official Account API may require the current outbound IP to be allowlisted.
-
-Useful check:
-
-```powershell
-Invoke-RestMethod -Uri "https://api.ipify.org"
-```
-
-Ask the account owner to add that IP in the WeChat Official Account backend.
-
-### Missing image placeholders
-
-If the publishing script reports zero placeholder images or body images do not upload, verify `article.md` contains real Markdown placeholders such as:
-
-```md
-![](img0.png)
-```
-
-### Browser publishing fallback
-
-If API publishing is blocked, use the browser-based publishing script or manual browser workflow from the installed WeChat publishing skill. Browser workflows are more fragile and should be verified with a screenshot or draft-box check.
+Browser-based publishing is not part of this skill. If a user explicitly chooses a browser-based publisher, use a dedicated companion skill/tool and an isolated, user-controlled browser profile.
