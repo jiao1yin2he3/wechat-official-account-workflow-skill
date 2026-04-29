@@ -1,0 +1,21 @@
+# Secrets and local config
+.env
+.env.*
+*.secret
+*.token
+.baoyu-skills/
+
+# Generated article workspaces / heavy media
+articles/
+Downloads/
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+
+# Runtime/editor noise
+.DS_Store
+Thumbs.db
+node_modules/
+.openclaw/
